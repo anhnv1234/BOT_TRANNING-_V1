@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ Đồ Tương Tác - Wyckoff Agent</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+            overflow-x: auto;
+        }
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            width: 1400px;
+        }
+        h1 {
+            color: #bb86fc;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #bb86fc;
+            border-bottom: 2px solid #bb86fc;
+            padding-bottom: 10px;
+        }
+        .box {
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 15px 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            font-weight: 500;
+            min-width: 220px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(187, 134, 252, 0.3);
+            border-color: #bb86fc;
+        }
+        .box h3 { margin-top: 0; color: #03dac6; }
+        .box p { margin-bottom: 0; font-size: 0.9em; color: #b0b0b0; }
+        .phase-box { border-left: 5px solid; padding: 20px 30px; width: 100%; box-sizing: border-box; }
+        .phase-1 { border-color: #f44336; }
+        .phase-2 { border-color: #ff9800; }
+        .phase-3 { border-color: #ffeb3b; }
+        .phase-4 { border-color: #4caf50; }
+        .phase-5 { border-color: #03a9f4; }
+        .arrow { font-size: 2.5em; color: #777; }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #555;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: #fff; }
+        .modal-content h2 { color: #bb86fc; margin-top: 0; }
+        .modal-content ul { list-style: none; padding-left: 0; }
+        .modal-content li { margin-bottom: 15px; padding-left: 25px; position: relative; }
+        .modal-content li::before {
+            content: '⚡';
+            position: absolute;
+            left: 0;
+            color: #03dac6;
+        }
+        .modal-content strong { color: #f0e68c; }
+    </style>
+</head>
+<body>
+    <div class="diagram-container">
+        <h1>Sơ Đồ Tương Tác - Wyckoff Agent (vFinal)</h1>
+        <div class="box phase-box phase-1" data-modal-id="modal-1">
+            <h3>Giai Đoạn 1: Hậu Cần & Tình Báo</h3>
+            <p>Nhận dữ liệu, tự "khởi động nóng" và tính các chỉ số cơ bản.</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="box phase-box phase-2" data-modal-id="modal-2">
+            <h3>Giai Đoạn 2: Luận Giải & Sàng Lọc</h3>
+            <p>Tìm kiếm sự kiện Wyckoff và lọc nhiễu.</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="box phase-box phase-3" data-modal-id="modal-3">
+            <h3>Giai Đoạn 3: Cỗ Máy Trạng Thái (FSM)</h3>
+            <p>Xác định Giai Đoạn A, B, C, D...</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="box phase-box phase-4" data-modal-id="modal-4">
+            <h3>Giai Đoạn 4: Trí Tuệ Tiên Tri (ML)</h3>
+            <p>Sử dụng mô hình AI để dự báo xác suất.</p>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="box phase-box phase-5" data-modal-id="modal-5">
+            <h3>Giai Đoạn 5: Trình "Sấm Truyền"</h3>
+            <p>Đưa ra kết quả cuối cùng.</p>
+        </div>
+    </div>
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal-content" class="modal-content">
+            <span id="modal-close" class="modal-close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    <script>
+        const modalDetails = {
+            "modal-1": {
+                title: "Chi Tiết Giai Đoạn 1: Hậu Cần & Tình Báo",
+                details: `
+                    <ul>
+                        <li><strong>Hàm chính:</strong> <code>analyze()</code>, <code>_hot_start_data()</code></li>
+                        <li><strong>Input:</strong> Dữ liệu M1 thô từ file <code>data_1m_council.parquet</code>.</li>
+                        <li><strong>"Khởi Động Nóng":</strong> Hàm <code>_hot_start_data()</code> tự kiểm tra xem có đủ 4 giờ dữ liệu lịch sử để các bộ lọc hoạt động không. Nếu không, nó sẽ tự động "Mượn Gió Đông", gọi hàm <code>_fetch_historical_ohlc()</code> để kết nối đến Binance lấy về phần dữ liệu còn thiếu.</li>
+                        <li><strong>"Rèn Binh Khí":</strong> Tính toán các chỉ số kỹ thuật cơ bản cần thiết cho việc phân tích sâu hơn. Các "binh khí" này bao gồm:
+                            <ul>
+                                <li><strong>ATR:</strong> Thước đo độ biến động.</li>
+                                <li><strong>Volume MA:</strong> Khối lượng giao dịch trung bình.</li>
+                                <li><strong>Support/Resistance:</strong> Các tuyến phòng thủ/tấn công động.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Output:</strong> Một bảng dữ liệu đã được làm giàu với các "binh khí", sẵn sàng cho các "vị giám quan" ở giai đoạn sau.</li>
+                    </ul>
+                `
+            },
+            "modal-2": {
+                title: "Chi Tiết Giai Đoạn 2: Luận Giải & Sàng Lọc",
+                details: `
+                    <ul>
+                        <li><strong>Hàm chính:</strong> Vòng lặp <code>for</code> bên trong <code>analyze()</code></li>
+                        <li><strong>Input:</strong> Dữ liệu đã được chuẩn bị ở Giai Đoạn 1.</li>
+                        <li><strong>Luận Giải Sự Kiện:</strong> Thực hiện một vòng lặp có trạng thái (Stateful Loop) qua từng cây nến M1 để tìm kiếm 12 sự kiện Wyckoff tiềm năng (Spring, SOS, UTAD, No Supply...).</li>
+                        <li><strong>"Hội Đồng Giám Quan":</strong> Các sự kiện này sau đó phải vượt qua 2 bài kiểm tra khắc nghiệt (nếu được kích hoạt trong config):
+                            <ul>
+                                <li><strong>Kính Lọc Biến Động (Volatility Filter):</strong> Loại bỏ tín hiệu nếu thị trường đang quá "hỗn loạn" (ATR percentile > 90%) hoặc quá "tĩnh lặng" (ATR percentile < 10%).</li>
+                                <li><strong>Lệnh Bài Xác Nhận (Confirmation Filter):</strong> Loại bỏ tín hiệu nếu cây nến ngay sau đó không xác nhận. Ví dụ: một tín hiệu MUA (Spring) sẽ bị hủy nếu cây nến tiếp theo là một cây nến giảm giá.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Output:</strong> Một danh sách các sự kiện Wyckoff đã được sàng lọc, có độ tin cậy cao hơn.</li>
+                    </ul>
+                `
+            },
+            "modal-3": {
+                title: "Chi Tiết Giai Đoạn 3: Cỗ Máy Trạng Thái (FSM)",
+                details: `
+                    <ul>
+                        <li><strong>Hàm chính:</strong> Logic chuyển <code>current_phase</code> bên trong vòng lặp <code>for</code> của <code>analyze()</code></li>
+                        <li><strong>Input:</strong> Các sự kiện đã được sàng lọc từ Giai Đoạn 2.</li>
+                        <li><strong>"Trí Tuệ Bối Cảnh":</strong> "Cỗ Máy Trạng Thái" (Finite State Machine) được kích hoạt. Nó có "trí nhớ" về các sự kiện trước đó (<code>last_event</code>) và điểm bối cảnh (<code>context_score</code>).</li>
+                        <li><strong>Luận Giải Chuỗi Sự Kiện:</strong> Dựa trên chuỗi sự kiện, nó sẽ luận giải xem toàn bộ "chiến dịch" đang ở Giai đoạn nào. Ví dụ:
+                            <ul>
+                                <li><code>SELLING_CLIMAX</code> → Chuyển sang <strong>Giai Đoạn A (Tích Lũy)</strong>.</li>
+                                <li>Sau đó có <code>SPRING</code> hoặc một cụm <code>NO_SUPPLY</code> → Chuyển sang <strong>Giai Đoạn C</strong>.</li>
+                                <li>Sau Giai Đoạn C, có <code>SOS</code> → Chuyển sang <strong>Giai Đoạn D</strong>.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Output:</strong> Các cột dữ liệu mới cực kỳ giá trị: <code>wyckoff_phase</code> (tên Giai đoạn) và <code>wyckoff_context_score</code> (điểm bối cảnh).</li>
+                    </ul>
+                `
+            },
+            "modal-4": {
+                title: "Chi Tiết Giai Đoạn 4: Trí Tuệ Tiên Tri (ML)",
+                details: `
+                    <ul>
+                        <li><strong>Hàm chính:</strong> Logic xử lý <code>signal_df</code> và gọi <code>self.model</code> trong <code>analyze()</code></li>
+                        <li><strong>Input:</strong> Toàn bộ "mật báo" đã được luận giải từ các giai đoạn trước (sự kiện, pha, điểm bối cảnh, các chỉ số thô...).</li>
+                        <li><strong>"Tổng Hợp Tấu Chương":</strong> Các thông tin này được tập hợp lại thành một vector feature.</li>
+                        <li><strong>"Triệu Hồi Thần Thú":</strong> Vector này được trình lên cho <strong>bộ não AI</strong> (<code>wyckoff_ml_model.joblib</code>) đã được huấn luyện từ trước.</li>
+                        <li><strong>"Lời Sấm Truyền":</strong> Bộ não AI thực hiện phép tính <code>model.predict_proba(...)</code>, một thuật toán phức tạp để tính toán xác suất.</li>
+                        <li><strong>Output:</strong> Một con số duy nhất - xác suất thành công của tín hiệu.</li>
+                    </ul>
+                `
+            },
+            "modal-5": {
+                title: "Chi Tiết Giai Đoạn 5: Trình 'Sấm Truyền'",
+                details: `
+                    <ul>
+                        <li><strong>Hàm chính:</strong> Các dòng cuối cùng của hàm <code>analyze()</code></li>
+                        <li><strong>Input:</strong> Xác suất thành công từ bộ não AI.</li>
+                        <li><strong>"Đóng Dấu Âm Dương":</strong> Xác suất này được nhân với hướng của tín hiệu (dương cho Mua, âm cho Bán, dựa trên <code>wyckoff_event_score</code>) để tạo ra "lời sấm truyền" cuối cùng.</li>
+                        <li><strong>Output:</strong> Cột <code>wyckoff_probability</code>. Đây là "mật báo" tinh túy nhất sẽ được trình lên cho <code>Master Decision Agent</code>.
+                            <ul>
+                                <li>Giá trị <strong>+0.85</strong> có nghĩa là: "Tâu Bệ hạ, thần có 85% tự tin rằng đây là một tín hiệu Mua tốt."</li>
+                                <li>Giá trị <strong>-0.72</strong> có nghĩa là: "Tâu Bệ hạ, thần có 72% tự tin rằng đây là một tín hiệu Bán tốt."</li>
+                            </ul>
+                        </li>
+                    </ul>
+                `
+            }
+        };
+        const diagramBoxes = document.querySelectorAll('.phase-box');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalBody = document.getElementById('modal-body');
+        const modalClose = document.getElementById('modal-close');
+        diagramBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                const modalId = box.getAttribute('data-modal-id');
+                const content = modalDetails[modalId];
+                if (content) {
+                    modalBody.innerHTML = `<h2>${content.title}</h2>${content.details}`;
+                    modalOverlay.style.display = 'flex';
+                }
+            });
+        });
+        const closeModal = () => {
+            modalOverlay.style.display = 'none';
+        };
+        modalClose.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

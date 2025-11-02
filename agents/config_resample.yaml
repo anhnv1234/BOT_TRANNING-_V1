@@ -1,0 +1,202 @@
+# File: config_resample.yaml
+
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+# -------------------------------------------------------PREPARE_DATA-------------------------------------------------------------------
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+
+
+# ===================================================================
+# 0,  ---------------------create_input.py---------------------------------
+# ===================================================================
+
+# Tên symbol trên Binance Futures
+symbol: 'btcusdt'
+# Tần suất cập nhật sổ lệnh
+depth_interval: '100ms'
+# Khoảng nghỉ của vòng lặp chính (tính bằng giây)
+main_loop_interval_s: 1.0
+# Tần suất lấy Open Interest qua API (tính bằng giây)
+oi_fetch_interval_s: 60
+# Tần suất lưu file kết quả (tính bằng giây)
+save_interval_s: 60
+# --- THAY ĐỔI CẤU HÌNH LƯU TRỮ ---
+# Thư mục lưu file kết quả
+output_folder: 'raw_data'
+# Tên file kết quả duy nhất
+output_filename: 'raw_market_data.parquet'
+
+# --- THAY ĐỔI CẤU HÌNH HIỂN THỊ ---
+# Số ngày để hiển thị trên thanh tiến trình
+run_duration_days: 10
+
+# Cấu hình cho việc tìm kiếm các vùng thanh khoản quan trọng
+liquidity_settings:
+  enabled: true
+  search_range_pct: 0.05
+  levels_to_find: 20
+  min_distance_between_levels: 50
+  zone_width_ticks: 20   # Độ rộng của vùng thanh khoản nóng, tính bằng tick
+
+
+# ===================================================================
+# 1,  ---------------------data_processor.py---------------------------------
+# ===================================================================
+
+# Cấu hình cho việc xử lý và gom nhóm dữ liệu thô
+# Đường dẫn đến file dữ liệu 1 giây đầu vào
+input_file_path: "raw_data/raw_market_data.parquet"
+
+# Thư mục để lưu các file dữ liệu đã được xử lý
+output_folder: "processed_data"
+
+# Tên file cho từng khung thời gian
+output_files:
+  bookmap_3s: "data_3s_bookmap.parquet"
+  council_1m: "data_1m_council.parquet"
+  emperor_1h: "data_1h_emperor.parquet"
+
+
+
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+# -------------------------------------------------------CONTEXT------------------------------------------------------------------------
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+
+
+
+# ===================================================================
+# 2,  ---------------------context_agent_1D.py---------------------------------
+# ===================================================================  
+
+# --- Cấu Hình Cho "Thái Tổ Hoàng Đế" (Agent D1) ---
+context_agent_1d:
+  # Đường dẫn tới file dữ liệu chiến lược dài hạn
+  d1_data_path: "processed_data/data_1d_emperor.parquet"
+
+  # Các tham số cho D1 thường dài hơn để nắm bắt xu hướng vĩ mô
+  fast_ema_period: 10
+  slow_ema_period: 21
+  trend_filter_sma_period: 50 # SMA 50 ngày là một chỉ báo xu hướng dài hạn kinh điển
+  rsi_period: 14
+  atr_period: 14
+  trend_strength_threshold: 0.002 # Yêu cầu sức mạnh lớn hơn một chút
+  divergence_lookback: 60      # Nhìn lại 2 tháng
+  divergence_peak_distance: 10  # Các đỉnh/đáy phải cách xa nhau hơn
+  gann_pivot_lookback: 200    # Tìm pivot trong gần 1 năm
+
+
+# ===================================================================
+# 3,  ---------------------context_agent_1H.py---------------------------------
+# ===================================================================  
+
+# Cấu hình cho các Agent trong hệ thống
+context_agent:
+  # Đường dẫn tới file dữ liệu chiến lược
+  h1_data_path: "processed_data/data_1h_emperor.parquet"
+
+  # Thông số cho các chỉ báo kỹ thuật cơ bản
+  fast_ema_period: 12
+  slow_ema_period: 26
+  trend_filter_sma_period: 200
+  rsi_period: 14
+  atr_period: 14
+  trend_strength_threshold: 0.001 # Ngưỡng sức mạnh tối thiểu để xác nhận xu hướng (0.1%)
+
+  # Thông số cho việc tìm phân kỳ
+  divergence_lookback: 50      # Số nến cuối cùng để quét tìm phân kỳ
+  divergence_peak_distance: 5   # Khoảng cách tối thiểu (số nến) giữa các đỉnh/đáy khi tìm phân kỳ
+
+  # Thông số cho Gann Fan
+  gann_pivot_lookback: 150    # Số nến để quét tìm đỉnh/đáy quan trọng làm điểm tựa cho quạt Gann
+
+
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+# -------------------------------------------------------AGENT--------------------------------------------------------------------------
+# ======================================================================================================================================
+# ======================================================================================================================================
+# ======================================================================================================================================
+
+
+# ===================================================================
+# 4,  ---------------------wyckoff_agent.py---------------------------------
+# ===================================================================  
+
+# --- Cấu Hình Cho "Hội Đồng Cố Vấn" ---
+council_agents:
+  # Cấu hình cho Wyckoff Agent (phiên bản cuối cùng, đầy đủ nhất)
+  wyckoff:
+    # --- Tham số cơ bản ---
+    lookback_period: 50      # Tầm nhìn để xác định hỗ trợ/kháng cự (50 phút)
+    volume_multiplier: 1.8   # Ngưỡng khối lượng cho cao trào (gấp 1.8 lần trung bình)
+    test_volume_multiplier: 0.8 # Ngưỡng khối lượng cho một cú Test (nhỏ hơn 0.8 lần trung bình)
+    atr_period: 14             # Chu kỳ ATR
+
+    # --- Cấu hình cho Cỗ Máy Trạng Thái (FSM) để luận giải Pha ---
+    fsm:
+      enabled: true
+      phase_confirmation_score: 8.0  # Điểm bối cảnh tối thiểu để xác nhận Pha B
+      reset_period: 20               # Số nến không có sự kiện để reset trạng thái
+      exhaustion_cluster_size: 3     # Số nến "kiệt sức" liên tiếp để xác nhận Pha C (khi không có Spring/UT)
+
+    # --- Bản đồ điểm số chi tiết cho từng sự kiện ---
+    score_map:
+      SPRING: 3.5
+      TEST_OF_SPRING: 4.0
+      SOS: 3.0
+      LPS_AFTER_SOS: 3.5
+      NO_SUPPLY: 1.5
+      SELLING_CLIMAX: 2.0
+      UPTHRUST: -3.5
+      TEST_OF_UTAD: -3.0
+      SOW: -3.0
+      LPSY_AFTER_SOW: -3.5
+      NO_DEMAND: -1.5
+      BUYING_CLIMAX: -2.0
+      NEUTRAL: 0.0
+
+    # --- Ngưỡng chi tiết cho logic phát hiện sự kiện ---
+    event_thresholds:
+      spring_close_pos: 0.6       # Vị trí đóng cửa tối thiểu cho Spring
+      upthrust_close_pos: 0.4     # Vị trí đóng cửa tối đa cho Upthrust
+      climax_sell_close_pos: 0.2  # Vị trí đóng cửa tối đa cho Selling Climax
+      climax_buy_close_pos: 0.8   # Vị trí đóng cửa tối thiểu cho Buying Climax
+      no_supply_demand_spread_window: 10 # Số nến để tính spread trung bình
+
+    # --- Cấu hình cho Bộ Lọc Biến Động ---
+    volatility_filter:
+      enabled: true
+      atr_rolling_window: 240 # Tính percentile trên 4 giờ gần nhất
+      atr_low_percentile: 10  # Chỉ chấp nhận tín hiệu khi ATR > percentile 10
+      atr_high_percentile: 90 # và ATR < percentile 90
+      
+    # --- Cấu hình cho Bộ Lọc Nến Xác Nhận ---
+    confirmation_filter:
+      enabled: true
+
+    # --- Cấu hình cho việc "Dạy Học" (ML Labelling / Hậu kiểm) ---
+    # Dành riêng cho kịch bản wyckoff_ml_dataprep.py
+    ml_labelling:
+      enabled: true
+      forward_window: 20       # "Nhìn về tương lai" 20 phút để xem kết quả
+      profit_target_atr: 2.0   # Mục tiêu lợi nhuận = 2 * ATR
+      risk_reward_ratio: 1.5   # Tỷ lệ Lời/Lỗ tối thiểu để dán nhãn "Thắng"
+
+    # --- Cấu hình cho Bộ Đệm Sự Kiện (Event Buffer) ---
+    # Giúp Agent điềm tĩnh hơn, chỉ hành động khi có "cụm" tín hiệu
+    event_buffer:
+      enabled: true
+      min_cluster_size: 3 
+      clusterable_events: ["NO_SUPPLY", "NO_DEMAND", "TEST_OF_SPRING", "TEST_OF_UTAD"]
+
+    # --- Cấu hình cho mô hình ML đã được huấn luyện ---
+    # Đường dẫn đến "bộ não" AI đã được phong ấn
+    ml_model_path: "agents/wyckoff/wyckoff_ml_model.joblib"

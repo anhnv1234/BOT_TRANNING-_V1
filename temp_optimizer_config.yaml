@@ -1,0 +1,98 @@
+backtest_settings:
+  max_holding_period: 240
+  rr_ratio: 1.7566233626451864
+  sl_atr_multiplier: 2.533189967796657
+context_agent:
+  atr_period: 14
+  divergence_lookback: 50
+  divergence_peak_distance: 5
+  fast_ema_period: 12
+  gann_pivot_lookback: 150
+  h1_data_path: processed_data/data_1h_emperor.parquet
+  rsi_period: 14
+  slow_ema_period: 26
+  trend_filter_sma_period: 200
+  trend_strength_threshold: 0.001
+context_agent_1d:
+  atr_period: 14
+  d1_data_path: processed_data/data_1d_emperor.parquet
+  divergence_lookback: 60
+  divergence_peak_distance: 10
+  fast_ema_period: 10
+  gann_pivot_lookback: 200
+  rsi_period: 14
+  slow_ema_period: 21
+  trend_filter_sma_period: 50
+  trend_strength_threshold: 0.002
+council_agents:
+  wyckoff:
+    atr_period: 14
+    confirmation_filter:
+      enabled: true
+    decision_threshold: 2.05218987232647
+    event_buffer:
+      clusterable_events:
+      - NO_SUPPLY
+      - NO_DEMAND
+      - TEST_OF_SPRING
+      - TEST_OF_UTAD
+      enabled: true
+      min_cluster_size: 3
+    event_thresholds:
+      climax_buy_close_pos: 0.8053593040055115
+      climax_sell_close_pos: 0.10564900570870367
+      no_supply_demand_spread_window: 15
+      spring_close_pos: 0.7816218193217923
+      upthrust_close_pos: 0.3211552012203285
+    fsm:
+      enabled: true
+      exhaustion_cluster_size: 3
+      phase_confirmation_score: 8.901812464532425
+      reset_period: 34
+    lookback_period: 35
+    ml_labelling:
+      enabled: true
+      forward_window: 20
+      profit_target_atr: 2.0
+      risk_reward_ratio: 1.5
+    ml_model_path: agents/wyckoff/wyckoff_ml_model.joblib
+    score_map:
+      BUYING_CLIMAX: -2.0
+      LPSY_AFTER_SOW: -3.5
+      LPS_AFTER_SOS: 3.5
+      NEUTRAL: 0.0
+      NO_DEMAND: -1.5
+      NO_SUPPLY: 1.5
+      SELLING_CLIMAX: 2.0
+      SOS: 3.0
+      SOW: -3.0
+      SPRING: 2.653567011049777
+      TEST_OF_SPRING: 4.327579990971563
+      TEST_OF_UTAD: -3.0
+      UPTHRUST: -3.206224344789899
+    test_volume_multiplier: 0.46456410333611925
+    volatility_filter:
+      atr_high_percentile: 82
+      atr_low_percentile: 22
+      atr_rolling_window: 240
+      enabled: true
+    volume_multiplier: 3.337434044409507
+depth_interval: 100ms
+input_file_path: raw_data/raw_market_data.parquet
+liquidity_settings:
+  enabled: true
+  levels_to_find: 20
+  min_distance_between_levels: 50
+  search_range_pct: 0.05
+  zone_width_ticks: 20
+main_loop_interval_s: 1.0
+oi_fetch_interval_s: 60
+output_filename: raw_market_data.parquet
+output_files:
+  bookmap_3s: data_3s_bookmap.parquet
+  council_1m: data_1m_council.parquet
+  emperor_1h: data_1h_emperor.parquet
+output_folder: processed_data
+run_duration_days: 10
+save_interval_s: 60
+symbol: btcusdt

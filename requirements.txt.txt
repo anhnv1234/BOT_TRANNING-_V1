@@ -1,0 +1,24 @@
+# --- Thư viện cơ bản & xử lý dữ liệu ---
+pandas
+numpy
+PyYAML
+pyarrow
+
+# --- Thư viện kết nối & Web ---
+requests
+websocket-client
+
+# --- Thư viện phân tích kỹ thuật & khoa học ---
+pandas-ta
+scipy
+
+# --- Thư viện "huyền học" ---
+pylunar
+
+# --- Thư viện giao diện người dùng ---
+tqdm
+
+# --- Thư viện cho các bước nâng cao sau này (Feature Selection & RL Training) ---
+lightgbm
+gymnasium
+stable-baselines3[torch]

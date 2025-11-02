@@ -1,0 +1,69 @@
+# =================================================================================
+# DANH MỤC DỮ LIỆU ĐẦU RA CHO CÁC AGENT (PHIÊN BẢN HOÀN CHỈNH)
+# =================================================================================
+# Chú thích: Hậu tố _sum, _last, _max, _min, _first cho biết phép tính được áp dụng
+# khi gom nhóm dữ liệu (ví dụ: từ 1 giây sang 1 phút).
+# =================================================================================
+
+
+# --- THÔNG TIN CƠ BẢN & NẾN OHLC ---
+timestamp: Mốc thời gian bắt đầu của cây nến (ví dụ: 2025-07-21 12:04:00).
+open: Giá mở cửa của cây nến, tính theo mid-price.
+high: Giá cao nhất của cây nến, tính theo mid-price.
+low: Giá thấp nhất của cây nến, tính theo mid-price.
+close: Giá đóng cửa của cây nến, tính theo mid-price.
+
+
+# --- CÁC CHỈ SỐ GIÁ NÂNG CAO ---
+vwap: Giá trung bình theo khối lượng (Volume-Weighted Average Price). Cho biết mức 'giá công bằng' trong kỳ, là vũ khí của dân chuyên nghiệp.
+spread_last: Chênh lệch giữa giá mua cao nhất và giá bán thấp nhất tại thời điểm đóng nến.
+mark_price_last: Giá tham chiếu của hợp đồng tương lai tại thời điểm đóng nến.
+index_price_last: Giá trung bình của tài sản trên các sàn Spot tại thời điểm đóng nến.
+premium_last: Chênh lệch giữa Mark Price và Index Price. Cho thấy sự lạc quan/bi quan của thị trường phái sinh.
+
+
+# --- DÒNG TIỀN & KHỐI LƯỢNG ---
+buy_volume_1s_sum: Tổng khối lượng của các lệnh mua chủ động (market buy) trong kỳ.
+sell_volume_1s_sum: Tổng khối lượng của các lệnh bán chủ động (market sell) trong kỳ.
+total_volume_1s_sum: Tổng khối lượng giao dịch trong kỳ (buy + sell).
+delta_sum: Chênh lệch giữa khối lượng mua và bán chủ động (buy_volume - sell_volume).
+order_flow_imbalance_last: Tỷ lệ mất cân bằng dòng tiền tại thời điểm đóng nến.
+trade_count_delta_sum: Chênh lệch về SỐ LƯỢNG lệnh mua và bán chủ động. Cho biết phe nào có nhiều lệnh hơn, bất kể khối lượng.
+
+
+# --- DỮ LIỆU PHÁI SINH & TÂM LÝ ---
+funding_rate_last: Tỷ lệ phí funding tại thời điểm đóng nến.
+open_interest_last: Tổng số hợp đồng mở tại thời điểm đóng nến.
+buy_liquidation_vol_sum: Tổng khối lượng của các lệnh Short bị thanh lý trong kỳ.
+sell_liquidation_vol_sum: Tổng khối lượng của các lệnh Long bị thanh lý trong kỳ.
+
+
+# --- SỔ LỆNH & BIẾN ĐỘNG ---
+order_book_imbalance_last: Mất cân bằng sổ lệnh. Đo lường áp lực từ các lệnh chờ mua/bán tại thời điểm đóng nến.
+realtime_volatility_60s_last: Độ biến động của giá tính trên 60 giây cuối cùng của kỳ, cho thấy mức độ "nóng" của thị trường.
+
+
+# --- TOP 10 VÙNG THANH KHOẢN NÓNG (PHE MUA) ---
+# (Lặp lại từ 1 đến 10)
+sig_bid_start_price_1_last: Giá bắt đầu của cụm thanh khoản mua quan trọng nhất tại thời điểm đóng nến.
+sig_bid_end_price_1_last: Giá kết thúc của cụm thanh khoản mua quan trọng nhất tại thời điểm đóng nến.
+sig_bid_cluster_size_1_last: Tổng khối lượng của cụm đó tại thời điểm đóng nến.
+sig_bid_cluster_size_1_max: Khối lượng LỚN NHẤT mà cụm đó đã từng đạt được trong suốt cây nến.
+...
+sig_bid_start_price_10_last: (Tương tự cho vùng quan trọng thứ 10)
+sig_bid_end_price_10_last:
+sig_bid_cluster_size_10_last:
+sig_bid_cluster_size_10_max:
+
+
+# --- TOP 10 VÙNG THANH KHOẢN NÓNG (PHE BÁN) ---
+# (Lặp lại từ 1 đến 10)
+sig_ask_start_price_1_last: Giá bắt đầu của cụm thanh khoản bán quan trọng nhất tại thời điểm đóng nến.
+sig_ask_end_price_1_last: Giá kết thúc của cụm thanh khoản bán quan trọng nhất tại thời điểm đóng nến.
+sig_ask_cluster_size_1_last: Tổng khối lượng của cụm đó tại thời điểm đóng nến.
+sig_ask_cluster_size_1_max: Khối lượng LỚN NHẤT mà cụm đó đã từng đạt được trong suốt cây nến.
+...
+sig_ask_start_price_10_last: (Tương tự cho vùng quan trọng thứ 10)
+sig_ask_end_price_10_last:
+sig_ask_cluster_size_10_last:
+sig_ask_cluster_size_10_max:
